@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bridgeapi
+  labels:
+    app: bridgeapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bridgeapi
+  template:    
+    metadata:
+      labels:
+        app: bridgeapi     
+    spec:
+      containers:
+      - name: bridgeapi
+        image: stephaneey/bridge:v1
+        ports:
+        - containerPort: 80
+        imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dependencyapi
+  labels:
+    app: dependencyapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dependencyapi
+  template:    
+    metadata:
+      labels:
+        app: dependencyapi     
+    spec:
+      containers:
+      - name: dependencyapi
+        image: stephaneey/dependencyapi:v1
+        ports:
+        - containerPort: 80
+        imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox      
+    spec:      
+      containers:
+      - name: busybox
+        image: governmentpaas/curl-ssl
+        command: ["/bin/sleep", "30d"]
+        imagePullPolicy: IfNotPresent
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: bridgeapisvc     
+spec:
+  selector:
+    app: bridgeapi
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dependencyapisvc     
+spec:
+  selector:
+    app: dependencyapi
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
